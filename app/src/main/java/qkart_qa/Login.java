@@ -1,0 +1,60 @@
+package qkart_qa;
+
+import java.time.Duration;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.FluentWait;
+
+public class Login {
+    WebDriver driver;
+    String url = "https://crio-qkart-frontend-qa.vercel.app/login";
+
+    public Login(WebDriver driver) {
+        this.driver = driver;
+    }
+
+    public void navigateToLoginPage() {
+        if (!this.driver.getCurrentUrl().equals(this.url)) {
+            this.driver.get(this.url);
+        }
+    }
+
+    public Boolean PerformLogin(String Username, String Password) throws InterruptedException {
+        WebElement username_txt_box = this.driver.findElement(By.id("username"));
+
+        username_txt_box.sendKeys(Username);
+        Thread.sleep(1000);
+
+        WebElement password_txt_box = this.driver.findElement(By.id("password"));
+
+        password_txt_box.sendKeys(Password);
+        Thread.sleep(1000);
+
+        WebElement login_button = driver.findElement(By.className("button"));
+
+        login_button.click();
+        Thread.sleep(3000);
+
+        FluentWait<WebDriver> wait = new FluentWait<WebDriver>(driver)
+            .withTimeout(Duration.ofSeconds(30))
+            .pollingEvery(Duration.ofMillis(600)).ignoring(NoSuchElementException.class);
+        wait.until(ExpectedConditions.invisibilityOf(login_button));
+
+        return this.VerifyUserLoggedIn(Username);
+    }
+
+    public Boolean VerifyUserLoggedIn(String Username) {
+        try {
+            // Find the username label (present on the top right of the page)
+            WebElement username_label = this.driver.findElement(By.className("username-text"));
+            return username_label.getText().equals(Username);
+        } catch (Exception e) {
+            return false;
+        }
+
+    }
+}
